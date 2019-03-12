@@ -7,6 +7,6 @@ public class DecryptionImp implements Decryption{
     @Override
     public void calZhangLi(DataFrame dataFrame) {
         Double newData=(DecrytionConstantData.ZHANGLIONE/DecrytionConstantData.ZHANGLITWO)*1000*dataFrame.getOldData();
-        dataFrame.setNewData(DataUtil.dataFomateByParam(newData,DecrytionConstantData.TWO));
+        dataFrame.setNewData(DataUtil.dataFomateByParam(newData,DecrytionConstantData.SIX));
     }
 }

@@ -12,4 +12,6 @@ class DecrytionConstantData implements Serializable {
 
     public static final int TWO=2;
 
+    public static final int SIX=6;
+
 }
