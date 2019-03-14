@@ -1,10 +1,11 @@
 package com.zh.service;
 
+import com.zh.enums.DecryptionEnm;
 import com.zh.medol.DataFrame;
+import com.zh.medol.ZhangLiData;
 
 public interface Decryption {
 
-    public void calZhangLi(DataFrame dataFrame);
-
+    void calZhangLi(ZhangLiData dataFrame);
 
 }

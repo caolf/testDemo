@@ -1,10 +1,7 @@
 package com.zh.service;
 
-import java.io.Serializable;
 
-class DecrytionConstantData implements Serializable {
-
-    private static final long serialVersion=-1L;
+class DecrytionConstantData {
 
     public static final Double ZHANGLIONE=new Double("9.8");
 
@@ -12,6 +9,6 @@ class DecrytionConstantData implements Serializable {
 
     public static final int TWO=2;
 
-    public static final int SIX=6;
+    public static final int ZHANGLITHREE=9;
 
 }
