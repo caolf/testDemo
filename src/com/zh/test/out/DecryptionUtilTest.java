@@ -1,8 +1,9 @@
 package com.zh.test.out;
 
-import com.zh.enums.DecryptionEnm;
+import com.zh.medol.PendulumAcceleration;
+import com.zh.medol.RatchetAngle;
 import com.zh.medol.ZhangLiData;
-import com.zh.out.DecryptionUtil;
+import com.api.out.DecryptionUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -65,13 +66,13 @@ public class DecryptionUtilTest {
         ZhangLiData data = new ZhangLiData();
         data.setTime("2018,10,31,13,2,13,");
         data.setOldData(0.744629);
-        DecryptionUtil.decryptionCal(DecryptionEnm.ZHANGLI,data);
+        DecryptionUtil.decryptionCal(data);
         System.out.println(data.getNewData());
-        Assert.assertEquals(new Double(6.633967455),data.getNewData());
+        Assert.assertEquals(new Double(6.633967455), data.getNewData());
 
         int num = 0;
         for (int i = 0, len = old.size(); i < len; i++) {
-            DecryptionUtil.decryptionCal(DecryptionEnm.ZHANGLI, old.get(i));
+            DecryptionUtil.decryptionCal(old.get(i));
 
             if (old.get(i).getNewData().doubleValue() != news.get(i).getNewData().doubleValue()) {
                 System.out.println("error:" + old.get(i).getTime() + "      计算值:" +
@@ -80,9 +81,34 @@ public class DecryptionUtilTest {
 
                 num++;
             }
-
             //Assert.assertEquals(old.get(i).getNewData(),news.get(i).getNewData());
         }
         System.out.println("总数:" + old.size() + "   错误数据：" + num);
     }
+
+    @Test
+    public void calRatchetAngle() {
+        List<RatchetAngle> list = new ArrayList<>();
+        list.add(new RatchetAngle("2018121111256", 2.4852, 2.49995, 0.1997));
+        list.add(new RatchetAngle("2018121111221", 2.4950, 2.49995, 0.1997));
+        list.add(new RatchetAngle("2018121111236", 2.5430, 2.49995, 0.1997));
+        for (RatchetAngle item : list) {
+            DecryptionUtil.decryptionCal(item);
+            System.out.println("time:" + item.getTime() + "     new:" + item.getNewAngle() + "      old:" + item.getOldAngle());
+        }
+    }
+
+    @Test
+    public void calPendulumAcceleration() {
+        List<PendulumAcceleration> list = new ArrayList<>();
+        list.add(new PendulumAcceleration("2018121111256", 2.5852, 2.49995, 0.1997));
+        list.add(new PendulumAcceleration("2018121111256", 2.6950, 2.49995, 0.1997));
+        list.add(new PendulumAcceleration("2018121111256", 2.9930, 2.49995, 0.1997));
+        for (PendulumAcceleration item : list) {
+            DecryptionUtil.decryptionCal(item);
+            System.out.println("time:" + item.getTime() + "     new:" + item.getNewAcceleration() + "      old:" + item.getOldAcceleration());
+
+        }
+    }
+
 }

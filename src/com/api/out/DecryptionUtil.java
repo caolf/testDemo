@@ -1,16 +1,15 @@
-package com.zh.out;
+package com.api.out;
 
 import com.zh.common.NotProguard;
-import com.zh.enums.DecryptionEnm;
 import com.zh.medol.DataFrame;
 import com.zh.service.DecryptionService;
 
 @NotProguard
 public class DecryptionUtil {
 
-    public static void decryptionCal(DecryptionEnm type,DataFrame dataFrame){
+    public static void decryptionCal(DataFrame dataFrame){
         try {
-            DecryptionService.decryptionCal(type,dataFrame);
+            DecryptionService.decryptionCal(dataFrame);
         }catch (Exception e){
             throw new RuntimeException(e);
         }
