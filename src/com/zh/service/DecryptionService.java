@@ -1,9 +1,9 @@
 package com.zh.service;
 
-import com.zh.medol.DataFrame;
-import com.zh.medol.PendulumAcceleration;
-import com.zh.medol.RatchetAngle;
-import com.zh.medol.ZhangLiData;
+import com.api.out.model.ShuZiZhenDongModel;
+import com.zh.model.*;
+
+import java.util.List;
 
 public class DecryptionService {
     private static Decryption decryption = new DecryptionImp();
@@ -19,4 +19,21 @@ public class DecryptionService {
             throw new RuntimeException("Params(type or dataFrame) are error!");
         }
     }
+
+    public static void calGalloping(List<GallopingModel> gallopingModelList){
+        decryption.calGalloping(gallopingModelList);
+    }
+
+    public static void calVibration(List<VibrationModel> vibrationMedolList){
+        decryption.calVibration(vibrationMedolList);
+    }
+
+    public static void calGalloping(String sourcePath, String resultPath) {
+        decryption.calGalloping(sourcePath,resultPath);
+    }
+
+    public static void calShuZiZhenDong(List<ShuZiZhenDongModel> shuZiZhenDongModelList) {
+        decryption.calShuZiZhenDong(shuZiZhenDongModelList);
+    }
+
 }

@@ -1,12 +1,14 @@
 package com.zh.test.out;
 
 import com.api.out.DecryptionUtil;
-import com.zh.medol.PendulumAcceleration;
-import com.zh.medol.RatchetAngle;
-import com.zh.medol.ZhangLiData;
+import com.zh.Util.FileUtil;
+import com.zh.enums.DecryptionEnm;
+import com.zh.model.*;
+import com.zh.service.DecryptionService;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -107,6 +109,69 @@ public class DecryptionUtilTest {
             DecryptionUtil.decryptionCal(item);
             System.out.println("time:" + item.getTime() + "     new:" + item.getNewAcceleration() + "      old:" + item.getOldAcceleration());
 
+        }
+    }
+
+    @Test
+    public void calGalloping() {
+
+        String sourcePath = "D:\\git\\testDemo\\src\\com\\zh\\file\\wudong.csv";
+        String resultPath = "D:\\git\\testDemo\\src\\com\\zh\\file\\wudongResult.csv";
+
+        DecryptionService.calGalloping(sourcePath, resultPath);
+    }
+
+    @Test
+    public void calWuDong() {
+        String sourcePath = "D:\\git\\testDemo\\src\\com\\zh\\file\\2019-09-09wendu.csv";
+        String resultPath = "D:\\git\\testDemo\\src\\com\\zh\\file\\wudongResult.csv";
+
+        List<SourceGalloping> gallopingList = new ArrayList<>();
+        FileUtil.read(sourcePath, gallopingList, 1);
+
+        List<VibrationModel> vibrationModelList = new ArrayList<>();
+        for (SourceGalloping galloping : gallopingList) {
+            vibrationModelList.add(new VibrationModel(galloping.getTime(),
+                    galloping.getX(), galloping.getY(),
+                    galloping.getZ(), 0.1, 60, 1.75, 1.6, 1.6,
+                    galloping.getX1(), galloping.getY1(), galloping.getZ1(),
+                    1, 10));
+        }
+
+        DecryptionUtil.decryptionCal(vibrationModelList, DecryptionEnm.VIBRATION);
+
+
+        if (resultPath == null) {
+            throw new RuntimeException("fromPath is error");
+        }
+        String path = resultPath.substring(0, resultPath.lastIndexOf("\\"));
+        File file = new File(path);
+        try {
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            file = new File(path, "wudongResult.csv");
+            if (!file.exists() && !file.createNewFile()) {
+                throw new RuntimeException("new File error!");
+            }
+
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, "GB2312"));
+            String str = "年,月,日,时,分,秒,索引点,X,Y,Z,pf";
+            bufferedWriter.append(str);
+            bufferedWriter.newLine();
+            for (int i = 0, length = vibrationModelList.size(); i < length; i++) {
+                str = vibrationModelList.get(i).getTime() + "," + i + "," + vibrationModelList.get(i).getX() +
+                        "," + vibrationModelList.get(i).getY() +
+                        "," + vibrationModelList.get(i).getZ() +
+                        "," + vibrationModelList.get(i).getPf();
+                bufferedWriter.append(str);
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.close();
+            fileOutputStream.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

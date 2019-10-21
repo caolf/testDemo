@@ -3,7 +3,7 @@
  * @Date 2019/3/11
  * @Desc
  */
-package com.zh.medol;
+package com.zh.model;
 
 import com.zh.common.NotProguard;
 

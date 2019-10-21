@@ -1,4 +1,4 @@
-package com.zh.medol;
+package com.zh.model;
 public class Galloping extends DataFrame {
     private double x ;
     private double y;
@@ -38,5 +38,9 @@ public class Galloping extends DataFrame {
 
     public void setZ(double z) {
         this.z = z;
+    }
+
+    public String toString(){
+        return  this.getX()+","+this.getY()+","+this.getZ();
     }
 }

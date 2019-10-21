@@ -1,12 +1,12 @@
 package com.zh.service;
 
+import com.api.out.model.ShuZiZhenDongModel;
+import com.zh.Util.FileUtil;
 import com.zh.common.DataUtil;
-import com.zh.medol.Galloping;
-import com.zh.medol.PendulumAcceleration;
-import com.zh.medol.RatchetAngle;
-import com.zh.medol.ZhangLiData;
+import com.zh.enums.DecryptionEnm;
+import com.zh.model.*;
 
-import java.util.Queue;
+import java.util.*;
 
 public class DecryptionImp implements Decryption {
 
@@ -31,59 +31,136 @@ public class DecryptionImp implements Decryption {
     }
 
     @Override
-    public Galloping calGalloping(Queue<Galloping> gallopings) {
-        if (gallopings == null || gallopings.size() == 0) {
-            throw new RuntimeException("queue is empty!");
-        }
-        int N = 10;
-        double ts = 0.1;
-        if (gallopings.size() < 2 * N + 1) {
-            return new Galloping();
-        } else {
-            Galloping a = gallopings.element();
-            Galloping avg = mean(gallopings);
-            Galloping ak = calAK(a, avg);
-            Galloping p = calP(ak, ts);
+    public void calGalloping(String sourcePath, String resultPath) {
+        //读取源数据
+        List<SourceGalloping> sourceGallopings = new ArrayList<>();
+        FileUtil.read(sourcePath, sourceGallopings, 1);
+        //初始化参数
+        final int N = 10;
+        final double ts = 0.1;
+        int length = 2 * N + 1;
 
-            Galloping mid = getMidElement(gallopings);
-
-            return midSubAvg(mid, avg);
-        }
-
-    }
-
-    private Galloping midSubAvg(Galloping mid, Galloping avg) {
-        return new Galloping(mid.getX() - avg.getX(), mid.getY() - avg.getY(), mid.getZ() - avg.getZ());
-    }
-
-    private Galloping getMidElement(Queue<Galloping> gallopings) {
-        int i = 0;
-        for (Galloping item : gallopings) {
-            if (i == gallopings.size() / 2) {
-                return new Galloping(item.getX(), item.getY(), item.getZ());
-            }
-        }
-        return new Galloping();
-    }
-
-    private Galloping calP(Galloping ak, double ts) {
+        Queue<Galloping> gallopings = new ArrayDeque<>(length);
+        Galloping v = new Galloping();
         Galloping p = new Galloping();
 
-        return p;
+        int queueCount = 0;
+        int index = 0;
+        Iterator<SourceGalloping> it = sourceGallopings.iterator();
+        while (it.hasNext()) {
+            SourceGalloping current = it.next();
+            //队满则出队，然后入队
+            if (gallopings.size() >= length) {
+                gallopings.poll();
+                gallopings.offer(current);
+
+                SourceGalloping a = current;
+                Galloping avg = mean(gallopings);
+                Galloping ak = calAK(a, avg);
+                calV(v, ak, ts);
+                calP(p, v, ts);
+
+            } else {
+                gallopings.offer(current);
+                queueCount++;
+                v = new Galloping();
+                p = new Galloping();
+            }
+
+            System.out.println(index + "  A:" + current.toString() + "  V:" + v.toString() + " P:" + p.toString());
+            changeSourceGallopingsToResult(sourceGallopings, p, index);
+            index++;
+        }
+
+        FileUtil.write(resultPath, sourceGallopings);
+
     }
 
-    private Galloping calAK(Galloping a, Galloping avg) {
+    //舞动算法
+    @Override
+    public void calGalloping(List<GallopingModel> gallopingModelList) {
+        if (gallopingModelList == null && gallopingModelList.size() > 0) {
+            throw new RuntimeException(DecryptionEnm.GALLOPING.toString() + ": 参数List不能为null且size大于0！");
+        }
+
+        List<XYZ> s = WuAndZhengUtil.cal(gallopingModelList);
+
+        for(int i = 0, length = gallopingModelList.size(); i<length; i++){
+            WuAndZhengUtil.getGallopingResult(gallopingModelList.get(i),s.get(i));
+        }
+    }
+
+    //振动算法
+    @Override
+    public void calVibration(List<VibrationModel> vibrationMedolList) {
+
+        if (vibrationMedolList == null && vibrationMedolList.size() > 0) {
+            throw new RuntimeException(DecryptionEnm.VIBRATION.toString() + ": 参数List不能为null且size大于0！");
+        }
+
+        List<XYZ> s = WuAndZhengUtil.cal(vibrationMedolList);
+
+        for(int i=0,length=vibrationMedolList.size();i<length;i++){
+            WuAndZhengUtil.getVibrationResult(vibrationMedolList.get(i),s.get(i),WuAndZhengUtil.calSqe(s.get(i)));
+        }
+    }
+
+    @Override
+    public void calShuZiZhenDong(List<ShuZiZhenDongModel> shuZiZhenDongModelLists) {
+        if (shuZiZhenDongModelLists == null && shuZiZhenDongModelLists.size() > 0) {
+            throw new RuntimeException(DecryptionEnm.VIBRATION.toString() + ": 参数List不能为null且size大于0！");
+        }
+
+        ShuZiZhengDongV2.calShuZiZheng(shuZiZhenDongModelLists);
+    }
+
+    private void changeSourceGallopingsToResult(List<SourceGalloping> sourceGallopings, Galloping p, int index) {
+        sourceGallopings.get(index).changeSourceGalloping(p);
+    }
+
+    private void calV(Galloping v, Galloping ak, double ts) {
+        v.setX(v.getX() + ak.getX() * ts);
+        v.setY(v.getY() + ak.getY() * ts);
+        v.setZ(v.getZ() + ak.getZ() * ts);
+    }
+
+
+    private void calP(Galloping p, Galloping v, double ts) {
+        p.setX(p.getX() + v.getX() * ts);
+        p.setY(p.getY() + v.getY() * ts);
+        p.setZ(p.getZ() + v.getZ() * ts);
+    }
+
+    private Galloping calAK(SourceGalloping a, Galloping avg) {
         Galloping ak = new Galloping();
-        ak.setX((a.getX() - avg.getX()) * 9.8 / a.getX());
-        ak.setY((a.getY() - avg.getY()) * 9.8 / a.getY());
-        ak.setZ((a.getZ() - avg.getZ()) * 9.8 / a.getZ());
+        ak.setX((a.getX() - avg.getX()) * 9.8 / a.getX1());
+        ak.setY((a.getY() - avg.getY()) * 9.8 / a.getY1());
+        ak.setZ((a.getZ() - avg.getZ()) * 9.8 / a.getZ1());
         return ak;
     }
 
 
     private Galloping mean(Queue<Galloping> gallopings) {
+        Galloping avg = new Galloping();
+        int i = 0;
 
-        return new Galloping();
+        for (Galloping it : gallopings) {
+            avg.setX(avg.getX() + it.getX());
+            avg.setY(avg.getY() + it.getY());
+            avg.setZ(avg.getZ() + it.getZ());
+        }
+      /*  Iterator<Galloping> it = gallopings.iterator();
+        while (it.hasNext()) {
+            avg.setX(avg.getX() + it.next().getX());
+            avg.setY(avg.getY() + it.next().getY());
+            avg.setZ(avg.getZ() + it.next().getZ());
+        }*/
+        if (i != 0) {
+            avg.setX(avg.getX() / i);
+            avg.setY(avg.getY() / i);
+            avg.setZ(avg.getZ() / i);
+        }
+        return avg;
     }
 
 }

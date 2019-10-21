@@ -1,4 +1,4 @@
-package com.zh.medol;
+package com.zh.model;
 
 import com.zh.common.NotProguard;
 

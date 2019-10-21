@@ -1,4 +1,4 @@
-package com.zh.medol;
+package com.zh.model;
 
 public class XYZ extends DataFrame {
     private double x;
@@ -36,4 +36,6 @@ public class XYZ extends DataFrame {
     public double getZ() {
         return z;
     }
+
+
 }

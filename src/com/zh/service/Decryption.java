@@ -1,8 +1,9 @@
 package com.zh.service;
 
-import com.zh.medol.*;
+import com.api.out.model.ShuZiZhenDongModel;
+import com.zh.model.*;
 
-import java.util.Queue;
+import java.util.List;
 
 public interface Decryption {
 
@@ -15,5 +16,13 @@ public interface Decryption {
     void calPendulumAcceleration(PendulumAcceleration dataFrame);
 
     //舞动算法
-    Galloping calGalloping(Queue<Galloping> gallopings);
+    void calGalloping(String sourcePath,String resultPath);
+
+    void calGalloping(List<GallopingModel> vibrationMedolList);
+
+    //振动加密算法
+    void calVibration(List<VibrationModel> vibrationMedolList);
+
+    void calShuZiZhenDong(List<ShuZiZhenDongModel> shuZiZhenDongModelLists);
+
 }
